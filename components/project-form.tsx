@@ -15,7 +15,7 @@ import {
   WHATSAPP_URL,
 } from "@/lib/site-config"
 
-type Status = "editando" | "enviando" | "enviado" | "erro"
+type Status = "editando" | "enviado"
 
 const estadoInicial = {
   nome: "",
@@ -37,8 +37,8 @@ const campoBase =
 export function ProjectForm() {
   const [dados, setDados] = useState(estadoInicial)
   const [produto, setProduto] = useState<string[]>([])
-  const [honeypot, setHoneypot] = useState("")
   const [status, setStatus] = useState<Status>("editando")
+  const [linkWhatsapp, setLinkWhatsapp] = useState("")
 
   function atualizar(campo: keyof typeof estadoInicial, valor: string) {
     setDados((atual) => ({ ...atual, [campo]: valor }))
@@ -52,31 +52,22 @@ export function ProjectForm() {
     )
   }
 
-  async function enviar(evento: React.FormEvent<HTMLFormElement>) {
+  function enviar(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    if (status === "enviando") return
 
-    setStatus("enviando")
+    const url = montarLinkWhatsapp(dados, produto)
 
-    try {
-      const resposta = await fetch("/api/avaliar-projeto", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...dados,
-          produto: produto.join(", "),
-          website: honeypot,
-        }),
-      })
+    // Conversão: é este evento que o Google Ads deve usar como objetivo.
+    // Marca a abertura do WhatsApp com o formulário preenchido — não há como
+    // o site saber se a mensagem foi de fato enviada depois disso.
+    trackLead({ estagio: dados.estagio, investimento: dados.investimento })
 
-      if (!resposta.ok) throw new Error(String(resposta.status))
+    // window.open direto no handler do clique, sem await antes, para que o
+    // navegador não trate a aba como popup e bloqueie.
+    window.open(url, "_blank", "noopener,noreferrer")
 
-      // Conversão: é este evento que o Google Ads deve usar como objetivo.
-      trackLead({ estagio: dados.estagio, investimento: dados.investimento })
-      setStatus("enviado")
-    } catch {
-      setStatus("erro")
-    }
+    setLinkWhatsapp(url)
+    setStatus("enviado")
   }
 
   if (status === "enviado") {
@@ -90,12 +81,26 @@ export function ProjectForm() {
           className="mx-auto mb-5 h-12 w-12 text-accent-strong"
         />
         <h2 className="text-2xl font-bold text-secondary">
-          Recebemos o seu formulário
+          Abrimos o WhatsApp com as suas respostas
         </h2>
         <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
-          Vamos ler o que você descreveu antes de responder. Se o projeto fizer
-          sentido para os dois lados, retornamos em até um dia útil pelo e-mail
-          informado para marcar a conversa.
+          A mensagem já vai preenchida — é só revisar e enviar. Assim que ela
+          chegar, lemos o que você descreveu e respondemos em até um dia útil.
+        </p>
+
+        {/* O window.open pode ter sido bloqueado pelo navegador. Este link
+            garante que a pessoa não fique sem saída. */}
+        <a
+          href={linkWhatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-7 inline-flex items-center justify-center rounded-full bg-secondary px-7 py-3.5 font-semibold text-secondary-foreground transition-colors hover:bg-secondary/90"
+        >
+          Abrir o WhatsApp
+        </a>
+
+        <p className="mt-4 text-sm text-muted-foreground">
+          Não abriu sozinho? Use o botão acima.
         </p>
       </div>
     )
@@ -193,6 +198,7 @@ export function ProjectForm() {
             name="problema"
             rows={6}
             required
+            maxLength={1500}
             className={cn(campoBase, "resize-y")}
             value={dados.problema}
             onChange={(e) => atualizar("problema", e.target.value)}
@@ -296,54 +302,65 @@ export function ProjectForm() {
         </Campo>
       </fieldset>
 
-      {/* Armadilha anti-spam. Invisível e fora da ordem de tabulação. */}
-      <div aria-hidden="true" className="hidden">
-        <label htmlFor="website">Não preencha este campo</label>
-        <input
-          id="website"
-          name="website"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          value={honeypot}
-          onChange={(e) => setHoneypot(e.target.value)}
-        />
-      </div>
-
       <div>
         <button
           type="submit"
-          disabled={status === "enviando"}
-          className="w-full rounded-full bg-secondary px-8 py-4 text-lg font-semibold text-secondary-foreground transition-colors hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-full bg-secondary px-8 py-4 text-lg font-semibold text-secondary-foreground transition-colors hover:bg-secondary/90"
         >
-          {status === "enviando" ? "Enviando…" : "Enviar para avaliação"}
+          Revisar e enviar pelo WhatsApp
         </button>
 
-        {status === "erro" ? (
-          <p
-            role="alert"
-            className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-          >
-            Não conseguimos enviar o formulário agora. Tente novamente em alguns
-            instantes ou fale com a gente pelo{" "}
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold underline"
-            >
-              WhatsApp
-            </a>
-            .
-          </p>
-        ) : null}
-
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Usamos estas informações apenas para avaliar o projeto e responder.
+          Abrimos o WhatsApp com as respostas já preenchidas. Você revisa antes
+          de enviar — nada sai daqui sem a sua confirmação.
         </p>
       </div>
     </form>
   )
+}
+
+/**
+ * Monta o link do WhatsApp com as respostas já formatadas.
+ *
+ * O site não tem backend: em vez de postar em um serviço externo, o
+ * formulário vira uma mensagem pronta que a pessoa revisa e envia. O ganho de
+ * qualificação continua o mesmo — as respostas chegam junto com o primeiro
+ * contato, em vez de um "olá, tudo bem?".
+ *
+ * Campos opcionais em branco são omitidos para a mensagem não chegar com
+ * linhas vazias.
+ */
+function montarLinkWhatsapp(
+  dados: typeof estadoInicial,
+  produto: string[],
+): string {
+  const linhas = [
+    "Olá! Preenchi o formulário de avaliação de projeto no site.",
+    "",
+    `*Nome:* ${dados.nome}`,
+    `*Empresa:* ${dados.empresa}`,
+    `*E-mail:* ${dados.email}`,
+    `*Telefone:* ${dados.telefone}`,
+  ]
+
+  if (dados.site.trim()) linhas.push(`*Site:* ${dados.site}`)
+
+  linhas.push(
+    "",
+    "*Problema ou processo a resolver*",
+    dados.problema,
+    "",
+    `*Como funciona hoje:* ${dados.comoFuncionaHoje}`,
+    `*Quem vai usar:* ${dados.usuarios}`,
+    `*O que imagino ser necessário:* ${
+      produto.length > 0 ? produto.join(", ") : "Ainda não sei"
+    }`,
+    `*Estágio:* ${dados.estagio}`,
+    `*Investimento previsto:* ${dados.investimento}`,
+    `*Pretendo iniciar:* ${dados.prazo}`,
+  )
+
+  return `${WHATSAPP_URL}?text=${encodeURIComponent(linhas.join("\n"))}`
 }
 
 function Campo({

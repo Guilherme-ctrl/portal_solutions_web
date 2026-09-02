@@ -28,7 +28,6 @@ app/
   page.tsx                        Home
   cases/marketplace-b2b/page.tsx  Case
   avaliar-projeto/page.tsx        Formulário de qualificação
-  api/avaliar-projeto/route.ts    Recebe o formulário e repassa (única peça de servidor)
   api/google-verification/        Verificação de propriedade do Google Search Console
   sitemap.ts / robots.ts          Gerados no build
   layout.tsx                      Metadados, tags do Google, dados estruturados
@@ -47,7 +46,7 @@ separadamente.
 
 Todas as variáveis abaixo ficam em **Vercel > Settings > Environment
 Variables**. Modelo completo em [`.env.example`](.env.example). Nenhuma é
-obrigatória para o site subir.
+obrigatória para o site subir — e o formulário funciona sem nenhuma delas.
 
 ### 1. Domínio canônico — `NEXT_PUBLIC_SITE_URL`
 
@@ -62,43 +61,59 @@ O valor é normalizado antes de virar canonical: `http://` vira `https://` e um
 errado — mas também não corrige o redirect do servidor, que é assunto da
 seção **Domínio** abaixo.
 
-### 2. Formulário — `FORM_ENDPOINT`
-
-O site não tem backend nem banco. O formulário posta em
-`/api/avaliar-projeto`, que apenas repassa para um serviço externo de e-mail.
-
-Escolha um serviço e cole a URL em `FORM_ENDPOINT`:
-
-- **Formspree** (recomendado, tem plano gratuito): crie um form em
-  formspree.io e use `https://formspree.io/f/SEU_ID`
-- **Formspark**: `https://submit-form.com/SEU_ID`
-
-A variável **não** tem o prefixo `NEXT_PUBLIC_`. Isso é proposital: ela fica no
-servidor e nunca é embutida no JavaScript entregue ao navegador. Nenhum e-mail
-ou identificador de conta aparece no frontend.
-
-Enquanto `FORM_ENDPOINT` estiver vazia, o envio falha com 503, o erro é
-registrado nos logs da Vercel e o formulário oferece o WhatsApp como
-alternativa — nunca finge que recebeu.
-
-### 3. Google Analytics 4 — `NEXT_PUBLIC_GA_ID`
+### 2. Google Analytics 4 — `NEXT_PUBLIC_GA_ID`
 
 Formato `G-XXXXXXXXXX`. Sem a variável, nenhum script do Google é carregado.
 
-### 4. Google Tag Manager — `NEXT_PUBLIC_GTM_ID`
+### 3. Google Tag Manager — `NEXT_PUBLIC_GTM_ID`
 
 Formato `GTM-XXXXXXX`. **Use GA_ID ou GTM_ID, não os dois** — configurar ambos
 duplica os eventos. O código detecta qual está definido e se ajusta.
 
-### 5. Google Ads — `NEXT_PUBLIC_ADS_ID` e `NEXT_PUBLIC_ADS_CONVERSION_LABEL`
+### 4. Google Ads — `NEXT_PUBLIC_ADS_ID` e `NEXT_PUBLIC_ADS_CONVERSION_LABEL`
 
 `ADS_ID` no formato `AW-000000000`. `ADS_CONVERSION_LABEL` é o rótulo da
 conversão criada no painel do Ads.
 
-**A conversão a rastrear é o evento `generate_lead`**, disparado apenas quando o
-formulário é enviado com sucesso. Cliques em CTA disparam `cta_click` com o
-parâmetro `cta_location` (`hero`, `header`, `case_home`, `case_final`,
-`home_final`, `404`) — servem para diagnóstico, não como conversão.
+**A conversão a rastrear é o evento `generate_lead`**, disparado quando a
+pessoa conclui o formulário e o WhatsApp é aberto com a mensagem pronta.
+
+Uma ressalva importante para calibrar o Ads: como o envio final acontece dentro
+do WhatsApp, o site **não tem como saber se a mensagem foi realmente enviada**.
+`generate_lead` mede a intenção qualificada — formulário inteiro preenchido,
+incluindo faixa de investimento — e não a mensagem recebida. Espere alguma
+diferença entre as conversões do Ads e as conversas que chegam de fato.
+
+Cliques em CTA disparam `cta_click` com o parâmetro `cta_location` (`hero`,
+`header`, `case_home`, `case_final`, `home_final`, `404`) — servem para
+diagnóstico, não como conversão.
+
+## Formulário de avaliação
+
+`/avaliar-projeto` coleta empresa, problema, usuários, produto, estágio,
+**faixa de investimento (obrigatória)** e prazo. Ao concluir, as respostas são
+formatadas em uma mensagem e o WhatsApp abre já preenchido — a pessoa revisa e
+envia.
+
+Isso é deliberado: **o site não tem backend, banco, serviço de formulário nem
+chave de API**. Não há nada para configurar e nada que possa expirar, quebrar
+ou vazar. As três páginas são HTML estático; a única rota de servidor que
+resta é a verificação de propriedade do Google.
+
+O que se ganha em relação a um botão de WhatsApp solto é a qualificação: o
+primeiro contato já chega com o problema descrito e a faixa de orçamento
+declarada, em vez de um "olá, tudo bem?".
+
+O que se perde, e vale ter em conta:
+
+- **Não há registro dos leads no seu lado.** O histórico é a conversa do
+  WhatsApp. Se um dia quiser os envios em e-mail ou planilha, aí sim entra um
+  serviço tipo Formspree.
+- **Não dá para confirmar o envio.** Se a pessoa desistir depois que o
+  WhatsApp abrir, o site conta como conversão mesmo assim (ver a ressalva na
+  seção do Google Ads).
+
+O número de destino é `WHATSAPP_NUMERO`, em `lib/site-config.ts`.
 
 ## Domínio
 
@@ -163,7 +178,8 @@ campanha paga:
 | Constante | O que controla |
 | --- | --- |
 | `PRECO_MINIMO_PROJETO` | Piso de investimento. Vazio = nenhuma menção a preço no site. Ao preencher (ex.: `"R$ 40 mil"`), a frase aparece sozinha na Home e em /avaliar-projeto. |
-| `FAIXAS_ORCAMENTO` | Faixas do campo obrigatório de investimento no formulário. **Valores provisórios — revisar.** |
+| `FAIXAS_ORCAMENTO` | Faixas do campo obrigatório de investimento. A escala começa em R$ 2 mil — não há opção abaixo disso de propósito, é o piso. |
+| `WHATSAPP_NUMERO` | Número que recebe as mensagens do formulário. |
 | `CASE_CLIENTE_NOME` | Deve permanecer vazio: o cliente não autorizou uso comercial da marca. |
 
 As demais listas do formulário (estágio, prazo, perfil de usuário) também estão

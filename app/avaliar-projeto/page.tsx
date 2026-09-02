@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 }
 
 const etapas = [
-  "Você descreve o problema e o estágio do projeto.",
-  "Avaliamos se é um trabalho que faz sentido para os dois lados.",
-  "Se fizer, marcamos uma conversa já sobre o seu processo.",
+  "Você responde algumas perguntas sobre o problema e o estágio do projeto.",
+  "As respostas viram uma mensagem pronta no WhatsApp — você revisa e envia.",
+  "Lemos antes de responder. Se fizer sentido para os dois lados, marcamos a conversa.",
 ]
 
 export default function AvaliarProjeto() {

@@ -61,14 +61,17 @@ export const PRECO_MINIMO_PROJETO = ""
 // ---------------------------------------------------------------------------
 // >>> FAIXAS DE ORÇAMENTO DO FORMULÁRIO <<<
 // ---------------------------------------------------------------------------
-// Campo obrigatório em /avaliar-projeto. Estes são valores PROVISÓRIOS —
-// revisar antes de publicar. Basta editar as strings abaixo; o formulário,
-// a validação e o e-mail recebido se ajustam sozinhos.
+// Campo obrigatório em /avaliar-projeto. A escala começa em R$ 2 mil porque a
+// demanda pode ser um site institucional, não só uma plataforma.
+// Basta editar as strings abaixo — o formulário e a mensagem do WhatsApp se
+// ajustam sozinhos. Não existe faixa abaixo de R$ 2 mil de propósito: esse é
+// o piso. Quem estiver abaixo dele cai em "Ainda precisamos definir".
 export const FAIXAS_ORCAMENTO = [
-  "Até R$ 30 mil",
-  "R$ 30 mil a R$ 60 mil",
-  "R$ 60 mil a R$ 120 mil",
-  "Acima de R$ 120 mil",
+  "R$ 2 mil a R$ 5 mil",
+  "R$ 5 mil a R$ 15 mil",
+  "R$ 15 mil a R$ 40 mil",
+  "R$ 40 mil a R$ 100 mil",
+  "Acima de R$ 100 mil",
   "Ainda precisamos definir",
 ] as const
 
