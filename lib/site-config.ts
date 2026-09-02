@@ -1,27 +1,130 @@
-// Decisões comerciais do site. Alterar aqui, não nos componentes.
+/**
+ * Decisões comerciais e de conteúdo do site.
+ * Alterar aqui, nunca nos componentes.
+ */
+
+// ---------------------------------------------------------------------------
+// Identidade e contato
+// ---------------------------------------------------------------------------
+
+export const SITE_NOME = "Portal Solutions"
+
+/**
+ * Domínio canônico da aplicação: HTTPS, sem www, sem barra no final.
+ * É a única forma do endereço que pode aparecer em canonical, Open Graph e
+ * sitemap.xml — servir o site também em www.portalsolutions.dev criaria uma
+ * segunda cópia indexável e dividiria a autoridade do domínio.
+ */
+const DOMINIO_CANONICO = "https://portalsolutions.dev"
+
+/**
+ * Normaliza o valor de NEXT_PUBLIC_SITE_URL para a forma canônica.
+ *
+ * Força HTTPS e remove o "www.", de modo que o canonical continue correto
+ * mesmo que a variável seja cadastrada na Vercel como "http://..." ou
+ * "https://www...". localhost é preservado como está, para o ambiente local.
+ * Valor inválido cai no domínio canônico em vez de derrubar o build.
+ */
+function normalizarSiteUrl(bruta: string): string {
+  try {
+    const url = new URL(bruta)
+    const ehLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1"
+
+    if (!ehLocal) {
+      url.protocol = "https:"
+      url.hostname = url.hostname.replace(/^www\./, "")
+    }
+
+    // origin já descarta path, query e barra final
+    return url.origin
+  } catch {
+    return DOMINIO_CANONICO
+  }
+}
+
+export const SITE_URL = normalizarSiteUrl(
+  process.env.NEXT_PUBLIC_SITE_URL ?? DOMINIO_CANONICO,
+)
 
 export const WHATSAPP_NUMERO = "5547933803750"
+export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMERO}`
+export const INSTAGRAM_URL = "https://www.instagram.com/portal.solutions/"
 
-// Preço do Diagnóstico de Escopo. Vazio = o Diagnóstico é gratuito e nenhum
-// preço aparece no site. Preencher só se um dia decidir cobrar pela etapa.
-export const DIAGNOSTICO_PRECO = ""
+// ---------------------------------------------------------------------------
+// >>> PISO DE INVESTIMENTO <<<
+// ---------------------------------------------------------------------------
+// Enquanto estiver vazio (""), nenhuma menção a preço mínimo aparece no site.
+// Ao preencher (ex.: "R$ 40 mil"), a frase passa a aparecer automaticamente
+// na Home e na página /avaliar-projeto. Não é preciso mexer em componente.
+export const PRECO_MINIMO_PROJETO = ""
 
-// Nome do cliente no case. Vazio = case publicado de forma anônima (sem citar a marca).
-// Só preencher depois do "ok" do cliente.
+// ---------------------------------------------------------------------------
+// >>> FAIXAS DE ORÇAMENTO DO FORMULÁRIO <<<
+// ---------------------------------------------------------------------------
+// Campo obrigatório em /avaliar-projeto. Estes são valores PROVISÓRIOS —
+// revisar antes de publicar. Basta editar as strings abaixo; o formulário,
+// a validação e o e-mail recebido se ajustam sozinhos.
+export const FAIXAS_ORCAMENTO = [
+  "Até R$ 30 mil",
+  "R$ 30 mil a R$ 60 mil",
+  "R$ 60 mil a R$ 120 mil",
+  "Acima de R$ 120 mil",
+  "Ainda precisamos definir",
+] as const
+
+// ---------------------------------------------------------------------------
+// Demais opções do formulário de avaliação
+// ---------------------------------------------------------------------------
+
+export const COMO_FUNCIONA_HOJE = [
+  "Planilhas",
+  "Processo manual",
+  "Sistema existente",
+  "Várias ferramentas diferentes",
+  "Ainda não existe",
+  "Outro",
+] as const
+
+export const USUARIOS_SOLUCAO = [
+  "Equipe interna",
+  "Clientes",
+  "Fornecedores/parceiros",
+  "Diferentes públicos",
+  "Ainda não sei",
+] as const
+
+export const NECESSIDADES_PRODUTO = [
+  "Sistema Web",
+  "Aplicativo Mobile",
+  "Painel administrativo",
+  "Backend/API",
+  "Integrações",
+  "Ainda não sei",
+] as const
+
+export const ESTAGIO_PROJETO = [
+  "Existe apenas uma ideia",
+  "Temos o processo mapeado",
+  "A operação já existe manualmente",
+  "Já temos um sistema e precisamos evoluí-lo ou substituí-lo",
+  "Já temos especificação/requisitos",
+] as const
+
+export const PRAZO_INICIO = [
+  "Imediatamente",
+  "Próximos 30 dias",
+  "1 a 3 meses",
+  "3 a 6 meses",
+  "Ainda estamos avaliando",
+] as const
+
+// ---------------------------------------------------------------------------
+// Case — publicado de forma anônima
+// ---------------------------------------------------------------------------
+// O cliente ainda não autorizou uso comercial da marca. Manter vazio.
+// Nenhum nome, logo, screenshot ou identidade do cliente deve entrar no site.
 export const CASE_CLIENTE_NOME = ""
 
-// Menor faixa = piso de projeto. Revisar os valores antes de publicar.
-export const FAIXAS_ORCAMENTO = [
-  "Até R$ 20 mil",
-  "R$ 20 mil a R$ 50 mil",
-  "R$ 50 mil a R$ 100 mil",
-  "Acima de R$ 100 mil",
-  "Ainda não defini",
-] as const
-
-export const TEMPO_OPERACAO = [
-  "Menos de 1 ano",
-  "1 a 3 anos",
-  "3 a 10 anos",
-  "Mais de 10 anos",
-] as const
+export const CASE_SLUG = "marketplace-b2b"
+export const CASE_URL = `/cases/${CASE_SLUG}`
+export const CASE_TITULO = "Marketplace B2B de locação"

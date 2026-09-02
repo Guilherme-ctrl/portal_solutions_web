@@ -1,41 +1,37 @@
-import { DIAGNOSTICO_PRECO } from "@/lib/site-config"
+import { CtaButton } from "@/components/cta-button"
+import { CASE_URL, PRECO_MINIMO_PROJETO } from "@/lib/site-config"
 
 export function Hero() {
   return (
-    <section className="py-16 md:py-24 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-3xl md:text-5xl font-bold text-secondary text-balance leading-tight mb-6">
-          Software sob medida para empresas que já operam
+    <section className="px-4 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-3xl text-center">
+        <h1 className="text-4xl font-bold leading-[1.1] text-balance text-secondary md:text-6xl">
+          Software sob medida para operações reais
         </h1>
 
-        <p className="text-lg md:text-2xl text-muted-foreground text-balance mb-4">
-          Escopo, prazo e preço fechados antes da primeira linha de código.
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground md:text-xl">
+          Transformamos processos, regras de negócio e operações complexas em
+          sistemas web e mobile preparados para evoluir junto com a empresa.
         </p>
 
-        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
-          Não vendemos horas nem promessas. Começamos mapeando o processo que hoje
-          trava a sua operação e entregamos, por escrito, o que vai ser construído,
-          em quanto tempo e por quanto.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#diagnostico"
-            className="px-8 py-4 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors font-semibold text-lg"
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <CtaButton href="/avaliar-projeto" local="hero" className="w-full sm:w-auto">
+            Avaliar meu projeto
+          </CtaButton>
+          <CtaButton
+            href={CASE_URL}
+            local="hero"
+            variant="outline"
+            className="w-full sm:w-auto"
           >
-            Começar pelo Diagnóstico
-          </a>
-          <a
-            href="#metodo"
-            className="px-8 py-4 rounded-full border border-secondary/30 text-secondary hover:bg-secondary/5 transition-colors font-semibold text-lg"
-          >
-            Como trabalhamos
-          </a>
+            Conhecer um case
+          </CtaButton>
         </div>
 
-        {DIAGNOSTICO_PRECO ? (
-          <p className="mt-6 text-sm text-muted-foreground">
-            Diagnóstico de Escopo a partir de {DIAGNOSTICO_PRECO}. Abatido no valor do projeto.
+        {/* Aparece automaticamente ao preencher PRECO_MINIMO_PROJETO em lib/site-config.ts */}
+        {PRECO_MINIMO_PROJETO ? (
+          <p className="mt-8 text-sm text-muted-foreground">
+            Projetos de software sob medida a partir de {PRECO_MINIMO_PROJETO}.
           </p>
         ) : null}
       </div>

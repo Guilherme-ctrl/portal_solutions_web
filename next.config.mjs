@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
+    // Site estático na Vercel; os únicos assets são PNGs pequenos e já
+    // dimensionados, então não há ganho em passar pelo otimizador.
     unoptimized: true,
   },
   async rewrites() {
