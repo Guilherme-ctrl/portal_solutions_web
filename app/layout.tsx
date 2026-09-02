@@ -8,8 +8,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Portal Solutions | Fábrica de Software',
-  description: 'Desenvolvemos Apps, Sistemas e Plataformas Web para qualquer plataforma. Transformamos suas ideias em soluções digitais.',
+  title: 'Portal Solutions | Software sob medida para empresas que já operam',
+  description: 'Escopo, prazo e preço fechados antes da primeira linha de código. Digitalizamos processos que hoje rodam em planilha, papel ou WhatsApp.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body className={`font-sans antialiased`}>
         {children}
         <Analytics />
