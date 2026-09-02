@@ -69,8 +69,8 @@ export function Metodo() {
             Comece pelo Diagnóstico
           </h3>
           <p className="text-secondary-foreground/80 max-w-2xl mx-auto leading-relaxed mb-6">
-            É um trabalho pago e independente: você sai com o escopo, a arquitetura e a
-            estimativa em mãos, mesmo que decida construir com outra pessoa.
+            Uma conversa e um documento: você sai com o escopo, a arquitetura e a
+            estimativa por escrito, mesmo que decida construir com outra pessoa.
             {DIAGNOSTICO_PRECO ? ` A partir de ${DIAGNOSTICO_PRECO}, abatido no valor do projeto.` : ""}
           </p>
           <a

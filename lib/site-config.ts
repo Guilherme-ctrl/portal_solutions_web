@@ -2,8 +2,8 @@
 
 export const WHATSAPP_NUMERO = "5547933803750"
 
-// Preço do Diagnóstico de Escopo. Vazio = nenhum preço é exibido no site.
-// Publicar um número é o filtro mais forte da página — preencher assim que definido.
+// Preço do Diagnóstico de Escopo. Vazio = o Diagnóstico é gratuito e nenhum
+// preço aparece no site. Preencher só se um dia decidir cobrar pela etapa.
 export const DIAGNOSTICO_PRECO = ""
 
 // Nome do cliente no case. Vazio = case publicado de forma anônima (sem citar a marca).
